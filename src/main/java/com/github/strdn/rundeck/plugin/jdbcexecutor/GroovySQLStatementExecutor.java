@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GroovySQLStatementExecutor {
+class GroovySQLStatementExecutor {
     static void executeStatement(final Sql sql, final String groovyStatementScript, final String args) throws ScriptException {
         ScriptEngineManager factory = new ScriptEngineManager();
         ScriptEngine engine = factory.getEngineByName("groovy");

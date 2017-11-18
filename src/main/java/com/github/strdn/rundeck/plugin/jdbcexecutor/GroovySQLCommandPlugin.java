@@ -15,11 +15,11 @@ import com.dtolabs.rundeck.core.plugins.configuration.Description;
 import com.dtolabs.rundeck.plugins.ServiceNameConstants;
 import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.util.DescriptionBuilder;
+import javax.script.ScriptException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
-import javax.script.ScriptException;
-
+import static com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLStatementExecutor.executeStatement;
 
 /**
  * GroovySQLCommandPlugin {@link NodeExecutor} plugin implementation.
@@ -28,9 +28,9 @@ import javax.script.ScriptException;
 @Plugin(name = GroovySQLCommandPlugin.PROVIDER_NAME, service = ServiceNameConstants.NodeExecutor)
 @PluginDescription(title = "JDBC Executor",description = "JDBC Executor")
 public class GroovySQLCommandPlugin implements NodeExecutor, Describable {
+    static final String PROVIDER_NAME = "jdbc-command";
+    private static final String SERVICE_PROVIDER_TYPE = "jdbc-command";
     public static final Logger logger = Logger.getLogger(GroovySQLCommandPlugin.class.getName());
-    public static final String SERVICE_PROVIDER_TYPE = "jdbc-command";
-    public static final String PROVIDER_NAME = "jdbc-command";
 
     private Framework framework;
 
@@ -61,13 +61,11 @@ public class GroovySQLCommandPlugin implements NodeExecutor, Describable {
         }
 
         try {
-            new GroovySQLStatementExecutor().executeStatement(new SqlConnectionBuilder(context, node, framework).build(), buildStatement(command), null);
-        } catch (ScriptException se) {
-            return NodeExecutorResultImpl.createFailure(StepFailureReason.PluginFailed, se.getMessage(), node);
+            executeStatement(new SqlConnectionBuilder(context, node, framework).build(), buildStatement(command), null);
+        } catch (ScriptException | PluginException sepe) {
+            return NodeExecutorResultImpl.createFailure(StepFailureReason.PluginFailed, sepe.getMessage(), node);
         } catch (ConfigurationException ce) {
             return NodeExecutorResultImpl.createFailure(StepFailureReason.ConfigurationFailure, ce.getMessage(), node);
-        } catch (PluginException pe) {
-            return NodeExecutorResultImpl.createFailure(StepFailureReason.PluginFailed, pe.getMessage(), node);
         }
         return NodeExecutorResultImpl.createSuccess(node);
     }
@@ -75,7 +73,7 @@ public class GroovySQLCommandPlugin implements NodeExecutor, Describable {
     private static String buildStatement(String[] args) {
         final StringBuilder stringBuilder = new StringBuilder();
         for (String s : args) {
-            stringBuilder.append(s + " ");
+            stringBuilder.append(s).append(" ");
         }
         return stringBuilder.toString();
     }

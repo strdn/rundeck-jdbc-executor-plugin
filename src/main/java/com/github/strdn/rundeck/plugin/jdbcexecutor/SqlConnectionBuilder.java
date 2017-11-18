@@ -17,23 +17,25 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 
+import static com.github.strdn.rundeck.plugin.jdbcexecutor.DBDrivers.getJDBCDriver;
 
-public class SqlConnectionBuilder {
+
+class SqlConnectionBuilder {
     private static final String PROJ_PROP_PREFIX = "project.";
     private static final String FWK_PROP_PREFIX = "framework.";
-
-    public static final String JDBC_PASSWORD_STORAGE_PATH = "jdbc-password-storage-path";
-    public static final String JDBC_PASSWORD_OPTION = "jdbc-password";
-    public static final String JDBC_USERNAME_OPTION = "jdbc-username";
-    public static final String JDBC_CONNECTION_STRING_OPTION = "jdbc-connect";
-    public static final String JDBC_CONNECTION_TIMEOUT_PROPERTY = "jdbc-connection-timeout";
-    public static final String DATABASE_TYPE_OPTION = "db-type";
-    public static final int DEFAULT_JDBC_CONNECTION_TIMEOUT = 30;
+    private static final String JDBC_PASSWORD_STORAGE_PATH = "jdbc-password-storage-path";
+    private static final String JDBC_PASSWORD_OPTION = "jdbc-password";
+    private static final String JDBC_USERNAME_OPTION = "jdbc-username";
+    private static final String DATABASE_TYPE_OPTION = "db-type";
+    private static final String JDBC_CONNECTION_TIMEOUT_PROPERTY = "jdbc-connection-timeout";
+    private static final int DEFAULT_JDBC_CONNECTION_TIMEOUT = 30;
 
     private ExecutionContext context;
     private INodeEntry node;
     private Framework framework;
     private String frameworkProject;
+
+    static final String JDBC_CONNECTION_STRING_OPTION = "jdbc-connect";
 
     SqlConnectionBuilder (final ExecutionContext context, final INodeEntry node, final Framework framework) {
         this.context = context;
@@ -42,23 +44,23 @@ public class SqlConnectionBuilder {
         this.frameworkProject = context.getFrameworkProject();
     }
 
-    public ExecutionContext getContext() {
+    private ExecutionContext getContext() {
         return context;
     }
 
-    public INodeEntry getNode() {
+    private INodeEntry getNode() {
         return node;
     }
 
-    public Framework getFramework() {
+    private Framework getFramework() {
         return framework;
     }
 
-    public String getFrameworkProject() {
+    private String getFrameworkProject() {
         return frameworkProject;
     }
 
-    public String getPassword() throws ConfigurationException {
+    private String getPassword() throws ConfigurationException {
         String storagePath = resolveProperty(JDBC_PASSWORD_STORAGE_PATH, null, getNode(), getFrameworkProject(), getFramework());
         if (storagePath != null) {
             //look up storage value
@@ -74,21 +76,13 @@ public class SqlConnectionBuilder {
                 ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
                 contents.writeContent(byteArrayOutputStream);
                 return new String(byteArrayOutputStream.toByteArray());
-            } catch (StorageException e) {
-                throw new ConfigurationException("Failed to read the jdbc password for " +
-                        "storage path: " + storagePath + ": " + e.getMessage());
-            } catch (IOException e) {
+            } catch (StorageException | IOException e) {
                 throw new ConfigurationException("Failed to read the jdbc password for " +
                         "storage path: " + storagePath + ": " + e.getMessage());
             }
         }
         //else look up option value
         return resolveProperty(JDBC_PASSWORD_OPTION, null, getNode(),
-                getFrameworkProject(), getFramework());
-    }
-
-    public int getConnectionTimeout() throws ConfigurationException {
-        return resolveIntProperty(JDBC_CONNECTION_TIMEOUT_PROPERTY, DEFAULT_JDBC_CONNECTION_TIMEOUT, getNode(),
                 getFrameworkProject(), getFramework());
     }
 
@@ -113,14 +107,14 @@ public class SqlConnectionBuilder {
         if (databaseType == null || databaseType.equals(DBTypes.UNKNOWN)) {
             throw new ConfigurationException("Unknown database type:" + node.getAttributes().get(DATABASE_TYPE_OPTION));
         }
-        final String jdbcDriver = new DBDrivers().getJDBCDriver(databaseType);
+        final String jdbcDriver = getJDBCDriver(databaseType);
 
         try {
             return Sql.newInstance(node.getAttributes().get(JDBC_CONNECTION_STRING_OPTION), getUsername(), getPassword(), jdbcDriver);
         } catch (ClassNotFoundException cnfe) {
             throw new ConfigurationException("jdbc driver class not found" + cnfe.getMessage());
         } catch (SQLException sqle) {
-            throw new PluginException("Failed to prepare connection", sqle);
+            throw new PluginException("Failed to prepare connection: " + sqle.getMessage(), sqle);
         }
     }
 

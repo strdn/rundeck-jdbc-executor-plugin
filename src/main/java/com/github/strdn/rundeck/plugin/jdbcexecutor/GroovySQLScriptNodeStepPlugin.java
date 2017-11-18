@@ -24,6 +24,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 
+import static com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLStatementExecutor.executeStatement;
+
 @Plugin(name = GroovySQLScriptNodeStepPlugin.SERVICE_PROVIDER_NAME, service = ServiceNameConstants.WorkflowNodeStep)
 @PluginDescription(title = "Groovy SQL Script Executor",description = "Groovy SQL Script Executor")
 public class GroovySQLScriptNodeStepPlugin implements NodeStepPlugin, DescriptionBuilder.Collaborator {
@@ -35,7 +37,7 @@ public class GroovySQLScriptNodeStepPlugin implements NodeStepPlugin, Descriptio
                     required = true,
                     defaultValue = FILE_SOURCE)
     @SelectValues(values = {FILE_SOURCE, INLINE_SOURCE})
-    String scriptSource;
+    private String scriptSource;
 
     @PluginProperty(title = "Groovy SQL script path", description = "file path", required = false)
     private String scriptPath;
@@ -48,7 +50,7 @@ public class GroovySQLScriptNodeStepPlugin implements NodeStepPlugin, Descriptio
     @PluginProperty(title = "Script args", description = "Groovy SQL script arguments")
     private String scriptArgs;
 
-    public static final String SERVICE_PROVIDER_NAME = "com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLScriptNodeStepPlugin";
+    static final String SERVICE_PROVIDER_NAME = "com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLScriptNodeStepPlugin";
 
     public void buildWith(DescriptionBuilder builder) {
         builder
@@ -61,8 +63,6 @@ public class GroovySQLScriptNodeStepPlugin implements NodeStepPlugin, Descriptio
     @Override
     public void executeNodeStep(PluginStepContext context, Map<String, Object> configuration, INodeEntry entry)
                 throws NodeStepException {
-
-        //final Path scriptFilePath = Paths.get(scriptPath).toAbsolutePath();
         Path scriptFilePath = null;
         if (scriptSource.equals(FILE_SOURCE)) {
             if (StringUtils.isBlank(scriptPath))
@@ -80,12 +80,12 @@ public class GroovySQLScriptNodeStepPlugin implements NodeStepPlugin, Descriptio
 
         try {
             if (scriptSource.equals(INLINE_SOURCE)) {
-                new GroovySQLStatementExecutor().executeStatement(
+                executeStatement(
                         new SqlConnectionBuilder(context.getExecutionContext(), entry, context.getFramework()).build(),
                         scriptBody, scriptArgs
                 );
             } else {
-                new GroovySQLStatementExecutor().executeStatement(
+                executeStatement(
                         new SqlConnectionBuilder(context.getExecutionContext(), entry, context.getFramework()).build(),
                         scriptFilePath, scriptArgs
                 );
