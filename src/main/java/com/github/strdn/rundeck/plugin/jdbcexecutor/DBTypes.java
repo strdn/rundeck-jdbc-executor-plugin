@@ -11,7 +11,7 @@ public enum DBTypes {
         if (oracleDatabase.equalsIgnoreCase(databaseName))
             return ORACLE;
         if (mysqlDatabase.equalsIgnoreCase(databaseName))
-            return ORACLE;
+            return MYSQL;
         if (postgresDatabase.equalsIgnoreCase(databaseName))
             return POSTGRES;
         return UNKNOWN;
