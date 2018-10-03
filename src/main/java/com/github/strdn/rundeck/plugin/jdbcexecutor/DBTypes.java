@@ -1,19 +1,18 @@
 package com.github.strdn.rundeck.plugin.jdbcexecutor;
 
 public enum DBTypes {
-    ORACLE, MYSQL, POSTGRES, UNKNOWN;
+    ORACLE("oracle.jdbc.driver.OracleDriver"),
+    MYSQL("com.mysql.jdbc.Driver"),
+    MSSQL("com.microsoft.sqlserver.jdbc.SQLServerDriver"),
+    POSTGRES("org.postgresql.Driver");
 
-    private static final String oracleDatabase = "ORACLE";
-    private static final String mysqlDatabase = "MYSQL";
-    private static final String postgresDatabase = "POSTGRES";
+    private final String driverName;
 
-    public static DBTypes getDBType(String databaseName) {
-        if (oracleDatabase.equalsIgnoreCase(databaseName))
-            return ORACLE;
-        if (mysqlDatabase.equalsIgnoreCase(databaseName))
-            return MYSQL;
-        if (postgresDatabase.equalsIgnoreCase(databaseName))
-            return POSTGRES;
-        return UNKNOWN;
+    DBTypes(String driverName) {
+        this.driverName = driverName;
+    }
+
+    public String getDriverName() {
+        return driverName;
     }
 }
