@@ -103,7 +103,7 @@ class SqlConnectionBuilder {
     public Sql build() throws ConfigurationException, PluginException {
         final DBTypes databaseType;
         try {
-            databaseType = DBTypes.valueOf(node.getAttributes().get(DATABASE_TYPE_OPTION));
+            databaseType = DBTypes.valueOf(node.getAttributes().get(DATABASE_TYPE_OPTION).toUpperCase());
         } catch(IllegalArgumentException e){
             throw new ConfigurationException("Unknown database type:" + node.getAttributes().get(DATABASE_TYPE_OPTION));
         }
