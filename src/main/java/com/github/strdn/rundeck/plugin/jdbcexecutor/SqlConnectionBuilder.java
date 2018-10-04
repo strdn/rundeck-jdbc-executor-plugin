@@ -17,8 +17,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static com.github.strdn.rundeck.plugin.jdbcexecutor.DBDrivers.getJDBCDriver;
-
 
 class SqlConnectionBuilder {
     private static final String PROJ_PROP_PREFIX = "project.";
@@ -103,11 +101,13 @@ class SqlConnectionBuilder {
     }
 
     public Sql build() throws ConfigurationException, PluginException {
-        final DBTypes databaseType = DBTypes.getDBType(node.getAttributes().get(DATABASE_TYPE_OPTION));
-        if (databaseType == null || databaseType.equals(DBTypes.UNKNOWN)) {
+        final DBTypes databaseType;
+        try {
+            databaseType = DBTypes.valueOf(node.getAttributes().get(DATABASE_TYPE_OPTION).toUpperCase());
+        } catch(IllegalArgumentException e){
             throw new ConfigurationException("Unknown database type:" + node.getAttributes().get(DATABASE_TYPE_OPTION));
         }
-        final String jdbcDriver = getJDBCDriver(databaseType);
+        final String jdbcDriver = databaseType.getDriverName();
 
         try {
             return Sql.newInstance(node.getAttributes().get(JDBC_CONNECTION_STRING_OPTION), getUsername(), getPassword(), jdbcDriver);
