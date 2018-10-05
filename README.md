@@ -14,7 +14,9 @@ Also appropriate `jdbc driver` and `groovy-sql-<version>.jar` (tested with groov
 
 To configure connect to you database add following parameters to node description in Rundeck Project resourses.xml:
 
-`db-type` : Database type. ORACLE and MYSQL was tested. See `com.github.strdn.rundeck.plugin.jdbcexecutor.DBTypes` for full list of supported databases
+One of:
+  * `db-type` : Database type. ORACLE and MYSQL was tested. See `com.github.strdn.rundeck.plugin.jdbcexecutor.DBTypes` for full list of supported databases
+  * `driver-class-name`: The fully-qualified name of the driver class. If provided, `db-type` is ignored.
 
 `jdbc-connect` : jdbc connection string
  
