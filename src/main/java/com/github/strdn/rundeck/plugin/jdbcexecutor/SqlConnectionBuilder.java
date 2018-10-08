@@ -25,6 +25,8 @@ class SqlConnectionBuilder {
     private static final String JDBC_PASSWORD_OPTION = "jdbc-password";
     private static final String JDBC_USERNAME_OPTION = "jdbc-username";
     private static final String DATABASE_TYPE_OPTION = "db-type";
+    private static final String DRIVER_CLASS_NAME = "driver-class-name";
+
     private static final String JDBC_CONNECTION_TIMEOUT_PROPERTY = "jdbc-connection-timeout";
     private static final int DEFAULT_JDBC_CONNECTION_TIMEOUT = 30;
 
@@ -100,15 +102,26 @@ class SqlConnectionBuilder {
         return user;
     }
 
-    public Sql build() throws ConfigurationException, PluginException {
-        final DBTypes databaseType;
-        try {
-            databaseType = DBTypes.valueOf(node.getAttributes().get(DATABASE_TYPE_OPTION).toUpperCase());
-        } catch(IllegalArgumentException e){
-            throw new ConfigurationException("Unknown database type:" + node.getAttributes().get(DATABASE_TYPE_OPTION));
+    private String getDriver() throws ConfigurationException {
+        String providedDriverClass = resolveProperty(DRIVER_CLASS_NAME, null, getNode(),
+                getFrameworkProject(), getFramework());
+        if(StringUtils.isNotBlank(providedDriverClass)) {
+            return providedDriverClass;
+        } else {
+            try {
+                String dbTypeValue = node.getAttributes().get(DATABASE_TYPE_OPTION);
+                if(StringUtils.isBlank(dbTypeValue)) {
+                    throw new ConfigurationException("Either " + DATABASE_TYPE_OPTION + " or " + DRIVER_CLASS_NAME + " must be specified in the node.");
+                }
+                return DBTypes.valueOf(dbTypeValue.toUpperCase()).getDriverName();
+            } catch(IllegalArgumentException e){
+                throw new ConfigurationException("Unknown database type:" + node.getAttributes().get(DATABASE_TYPE_OPTION));
+            }
         }
-        final String jdbcDriver = databaseType.getDriverName();
+    }
 
+    public Sql build() throws ConfigurationException, PluginException {
+        final String jdbcDriver = getDriver();
         try {
             return Sql.newInstance(node.getAttributes().get(JDBC_CONNECTION_STRING_OPTION), getUsername(), getPassword(), jdbcDriver);
         } catch (ClassNotFoundException cnfe) {
