@@ -22,7 +22,8 @@ One of:
  
 `jdbc-username` : database account name for connections
 
-`jdbc-password` : password
+`jdbc-password` : password or
+`jdbc-password-storage-path` for password from key storage
 
 `node-executor="jdbc-command"` (optional) for executing Groovy SQL scripts using Rundeck 'Command' tab. 
 jdbc-command node executor also can be set in the project.properties file for using jdbc-command executor for all project nodes: `service.NodeExecutor.default.provider=jdbc-command`
