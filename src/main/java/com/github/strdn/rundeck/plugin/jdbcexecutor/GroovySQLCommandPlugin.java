@@ -17,7 +17,6 @@ import com.dtolabs.rundeck.plugins.descriptions.PluginDescription;
 import com.dtolabs.rundeck.plugins.util.DescriptionBuilder;
 import javax.script.ScriptException;
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 
 import static com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLStatementExecutor.executeStatement;
 
@@ -30,7 +29,6 @@ import static com.github.strdn.rundeck.plugin.jdbcexecutor.GroovySQLStatementExe
 public class GroovySQLCommandPlugin implements NodeExecutor, Describable {
     static final String PROVIDER_NAME = "jdbc-command";
     private static final String SERVICE_PROVIDER_TYPE = "jdbc-command";
-    public static final Logger logger = Logger.getLogger(GroovySQLCommandPlugin.class.getName());
 
     private Framework framework;
 

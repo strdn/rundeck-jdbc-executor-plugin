@@ -1,9 +1,9 @@
-version = '0.1'
+version = '0.2'
 defaultTasks 'clean','build'
 apply plugin: 'java'
 apply plugin: 'idea'
 sourceCompatibility = 1.8
-ext.rundeckPluginVersion= '1.1'
+ext.rundeckPluginVersion = '1.2'
 
 repositories {
     mavenLocal()
@@ -11,11 +11,11 @@ repositories {
 }
 
 dependencies {
-    compile([group: 'org.rundeck', name: 'rundeck-core', version: '2.8.2',ext:'jar'],
-            [group: 'org.rundeck', name: 'rundeck-storage-api', version: '2.8.2',ext:'jar'],
+    compile([group: 'org.rundeck', name: 'rundeck-core', version: '3.3.7-20201208',ext:'jar'],
+            [group: 'org.rundeck', name: 'rundeck-storage-api', version: '3.3.7-20201208',ext:'jar'],
             'commons-lang:commons-lang:2.6',
-            'log4j:log4j:1.2.17',
-            'org.codehaus.groovy:groovy-sql:2.4.11'
+            'org.codehaus.groovy:groovy-sql:2.4.21',
+            'org.codehaus.groovy:groovy-jsr223:2.4.21'
     )
 }
 
